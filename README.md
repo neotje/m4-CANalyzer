@@ -22,6 +22,16 @@ frame_footer = %x55
 
 ### Config frame
 
+example
+```abnf
+; 500kbit/s, normal mode
+AA BB 00 07 A1 20 00 55
+
+; 1Mbit/s, loopback mode
+AA BB 00 0F 42 40 01 55
+```
+
+
 ```abnf
 config_data = can_bit_rate
 can_bit_rate = 4OCTET ; 32bit unsigned long
