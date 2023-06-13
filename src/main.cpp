@@ -3,10 +3,11 @@
 
 #include "serial_parser.h"
 #include "can.h"
+#include "status_led.h"
 
 void send_can_frame(Stream &out, can_frame_t &frame) {
     out.write(FRAME_HEADER);
-    out.write(FRAME_TYPE_CAN);
+    out.write(CAN_TYPE);
 
     uint8_t can_frame_type = 0;
 
@@ -43,9 +44,13 @@ void send_error_frame(Stream &out, uint8_t error_code) {
     out.write(error_code);
     out.write(FRAME_FOOTER);
     out.flush();
+
+    set_status_led(STATUS_ERROR);
 }
 
 void on_recieve(int packet_size) {
+    set_status_led_temporary(STATUS_ACTIVITY, 30);
+
     can_frame_t frame;
 
     frame.data = (uint8_t*)malloc(sizeof(uint8_t) * 8);
@@ -94,9 +99,16 @@ void set_can_config(config_frame_t* config) {
     default:
         break;
     }
+
+    set_status_led(STATUS_READY);
 }
 
 void setup() {
+    setup_status_led();
+
+    set_status_led(STATUS_READY);
+    set_status_led_temporary(STATUS_LOADING, 100);
+
     Serial.begin(2500000);
 
     setupCAN();
@@ -109,6 +121,8 @@ void setup() {
 }
 
 void loop() {
+    loop_status_led();
+
     parser_result_t* result = serial_parser_stream(Serial);
 
     if (result != nullptr) {
@@ -118,7 +132,11 @@ void loop() {
             break;
 
         case FRAME_TYPE_CAN:
+            set_status_led(STATUS_READY);
+            set_status_led_temporary(STATUS_ACTIVITY, 30);
+            
             int begin_result = 1;
+
             if (result->data.can.extended) {
                 begin_result = CAN.beginExtendedPacket(result->data.can.id, result->data.can.dlc, result->data.can.rtr);
             }
@@ -140,6 +158,7 @@ void loop() {
 
             if(!CAN.endPacket()) {
                 send_error_frame(Serial, SENDING_CAN_FRAME_ERROR);
+                break;
             }
 
             break;

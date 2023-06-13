@@ -96,6 +96,9 @@ parser_result_t* serial_parser_stream(Stream& in)
         result.data.can.rtr = frame_type & (1 << IS_RTR_BIT);
         result.data.can.dlc = frame_type & DLC_MASK;
 
+        if (result.data.can.dlc > 8)
+            result.data.can.dlc = 8;
+
         if (result.data.can.extended)
             state = EXPECT_CAN_FRAME_EXTENDED_ID;
         else
