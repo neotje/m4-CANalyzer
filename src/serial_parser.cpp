@@ -135,14 +135,14 @@ parser_result_t* serial_parser_stream(Stream& in)
 
     case EXPECT_CAN_FRAME_DATA:
     {
-        if (result.data.can.rtr) {
-            state = EXPECT_FRAME_FOOTER;
-            break;
-        }
-
         if (result.data.can.data != nullptr) {
             free(result.data.can.data);
             result.data.can.data = nullptr;
+        }
+
+        if (result.data.can.rtr || result.data.can.dlc == 0) {
+            state = EXPECT_FRAME_FOOTER;
+            break;
         }
 
         result.data.can.data = (uint8_t*)malloc(result.data.can.dlc);

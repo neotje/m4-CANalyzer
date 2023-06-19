@@ -7,6 +7,7 @@
 #define FRAME_HEADER 0xAA
 #define CONFIG_TYPE 0xBB
 #define CAN_TYPE 0xCC
+#define ERROR_TYPE 0xEE
 #define FRAME_FOOTER 0x55
 
 #define IS_EXTENDED_BIT 5

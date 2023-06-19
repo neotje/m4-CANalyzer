@@ -40,7 +40,7 @@ void send_can_frame(Stream &out, can_frame_t &frame) {
 
 void send_error_frame(Stream &out, uint8_t error_code) {
     out.write(FRAME_HEADER);
-    out.write(FRAME_TYPE_ERROR);
+    out.write(ERROR_TYPE);
     out.write(error_code);
     out.write(FRAME_FOOTER);
     out.flush();
@@ -49,7 +49,7 @@ void send_error_frame(Stream &out, uint8_t error_code) {
 }
 
 void on_recieve(int packet_size) {
-    set_status_led_temporary(STATUS_ACTIVITY, 30);
+    set_status_led_temporary(STATUS_ACTIVITY, 100);
 
     can_frame_t frame;
 
@@ -109,7 +109,7 @@ void setup() {
     set_status_led(STATUS_READY);
     set_status_led_temporary(STATUS_LOADING, 100);
 
-    Serial.begin(2500000);
+    Serial.begin(115200);
 
     setupCAN();
 
@@ -133,7 +133,7 @@ void loop() {
 
         case FRAME_TYPE_CAN:
             set_status_led(STATUS_READY);
-            set_status_led_temporary(STATUS_ACTIVITY, 30);
+            //set_status_led_temporary(STATUS_ACTIVITY, 100);
             
             int begin_result = 1;
 
@@ -149,7 +149,7 @@ void loop() {
                 break;
             }
 
-            if (!result->data.can.rtr) {
+            if (!result->data.can.rtr && result->data.can.dlc > 0) {
                 if(!CAN.write(result->data.can.data, result->data.can.dlc)) {
                     send_error_frame(Serial, SENDING_CAN_FRAME_ERROR);
                     break;
