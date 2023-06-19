@@ -1,5 +1,13 @@
 import { createContext } from "react";
 import CanAnalyzer, { CanMode } from "./CanAnalyzer";
+import CanFrame, { ICanFrame } from "./CanFrame";
+
+export interface ISendFrameForm {
+    id: number
+    extended: boolean
+    rtr: boolean
+    data: string
+}
 
 interface IAnalyzerContext {
     serialPort: SerialPort | null
@@ -20,6 +28,11 @@ interface IAnalyzerContext {
     canMode: CanMode
     setCanMode: (canMode: CanMode) => void
     applyCanConfig: () => Promise<void>
+
+    sendFrameForm: ISendFrameForm
+    setSendFrameForm: (sendFrameForm: ISendFrameForm) => void
+
+    canFrames: ICanFrame[]
 }
 
 export const defaultAnalyzerContext: IAnalyzerContext = {
@@ -40,6 +53,15 @@ export const defaultAnalyzerContext: IAnalyzerContext = {
     canMode: CanMode.Normal,
     setCanMode: () => { throw new Error("setCanMode not implemented") },
     applyCanConfig: () => { throw new Error("applyCanConfig not implemented") },
+
+    sendFrameForm: {
+        id: 0,
+        extended: false,
+        rtr: false,
+        data: ""
+    },
+    setSendFrameForm: () => { throw new Error("setSendFrameForm not implemented") },
+    canFrames: []
 }
 
 const AnalyzerContext = createContext<IAnalyzerContext>(defaultAnalyzerContext)
