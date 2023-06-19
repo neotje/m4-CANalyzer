@@ -58,6 +58,9 @@ const ResizableBox: React.FC<IResizableBoxProps> = ({ children, minWidth, maxWid
             sx={{
                 width: width,
                 position: 'relative',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                height: '100%',
             }}
         >
             {children}
