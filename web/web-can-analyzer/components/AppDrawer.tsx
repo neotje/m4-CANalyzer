@@ -1,9 +1,10 @@
-import { Box, IconButton, List, ListItem, Paper, Stack, Tooltip, styled } from '@mui/material';
+import { Box, Grid, IconButton, List, ListItem, Paper, Stack, Tooltip, styled } from '@mui/material';
 import { useState } from 'react';
 import { MdDeviceHub, MdSend, MdSettingsEthernet } from 'react-icons/md';
 import ResizableBox from './ResizableBox';
 import DeviceSettings from './DeviceSettings';
 import CanSettings from './CanSettings';
+import SendFrameForm from './SendFrameForm';
 
 interface IDrawerPage {
     title: string,
@@ -20,9 +21,9 @@ const AppDrawerList = styled(List)(({ theme }) => ({
 }))
 
 const AppDrawerContent = styled(Paper)(({ theme }) => ({
-    width: '100%',
     height: '100%',
     resize: 'horizontal',
+    zIndex: 99,
 }))
 
 interface IAppDrawerItemProps extends IDrawerPage {
@@ -59,14 +60,13 @@ export default function AppDrawer() {
         "send_can": {
             title: "Send CAN frame",
             icon: <MdSend />,
-            content: <></>
+            content: <SendFrameForm />
         },
     }
 
     const [selected, setSelected] = useState<string | undefined>("device_settings")
 
     const onItemClick = (key: string) => {
-        console.log(key)
         if (key === selected) {
             setSelected(undefined)
         } else {
@@ -89,11 +89,12 @@ export default function AppDrawer() {
             </AppDrawerList>
 
             {
-                selected && <ResizableBox minWidth={300}>
-                    <AppDrawerContent elevation={2}>
+                selected &&
+                <AppDrawerContent elevation={2}>
+                    <ResizableBox minWidth={300}>
                         {DrawerPages[selected].content}
-                    </AppDrawerContent>
-                </ResizableBox>
+                    </ResizableBox>
+                </AppDrawerContent>
             }
 
         </Stack>
