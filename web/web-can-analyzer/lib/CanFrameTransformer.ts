@@ -22,6 +22,7 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
         EXPECT_FRAME_HEADER: {
             onByte: (byte, controller) => {
                 if (byte == 0xAA) {
+                    this.frame.timestamp = Date.now()
                     return this.goto("EXPECT_FRAME_TYPE")
                 }
             }
@@ -31,6 +32,8 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
                 if (byte == 0xCC) {
                     return this.goto("EXPECT_CAN_FRAME_TYPE")
                 }
+
+                console.log(`Unknown frame type ${byte.toString(16)}`)
                 
                 return this.goto("EXPECT_FRAME_HEADER")
             }
@@ -40,6 +43,8 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
                 this.frame.extended = ((byte >> IS_EXTENDED_BIT) & 1) == 1
                 this.frame.rtr = ((byte >> IS_RTR_BIT) & 1) == 1
                 this.frame.dlc = byte & DLC_MASK
+
+                this.frame.data = new Uint8Array(this.frame.rtr ? 0 : this.frame.dlc)
 
                 if (this.frame.extended) {
                     return this.goto("EXPECT_CAN_FRAME_EXTENDED_ID")
@@ -55,6 +60,10 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
                 if (this.buffer.length == 2) {
                     this.frame.id = (this.buffer[0] << 8) | this.buffer[1]
 
+                    if (this.frame.rtr || this.frame.dlc == 0) {
+                        return this.goto("EXPECT_FRAME_FOOTER")
+                    }
+
                     return this.goto("EXPECT_CAN_FRAME_DATA")
                 }
             }
@@ -65,6 +74,10 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
 
                 if (this.buffer.length == 4) {
                     this.frame.id = (this.buffer[0] << 24) | (this.buffer[1] << 16) | (this.buffer[2] << 8) | this.buffer[3]
+
+                    if (this.frame.rtr || this.frame.dlc == 0) {
+                        return this.goto("EXPECT_FRAME_FOOTER")
+                    }
 
                     return this.goto("EXPECT_CAN_FRAME_DATA")
                 }
@@ -81,9 +94,6 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
                 if (this.buffer.length == this.frame.dlc) {
                     this.frame.data = new Uint8Array(this.buffer)
 
-                    controller.enqueue(this.frame)
-                    this.frame = new CanFrame()
-
                     return this.goto("EXPECT_FRAME_FOOTER")
                 }
             }
@@ -91,6 +101,9 @@ class CanFrameTransformer implements Transformer<Uint8Array, CanFrame> {
         EXPECT_FRAME_FOOTER: {
             onByte: (byte, controller) => {
                 if (byte == 0x55) {
+                    controller.enqueue(this.frame)
+                    this.frame = new CanFrame()
+
                     return this.goto("EXPECT_FRAME_HEADER")
                 }
             }

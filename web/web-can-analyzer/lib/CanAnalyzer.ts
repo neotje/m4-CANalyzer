@@ -1,6 +1,7 @@
+'use strict'
+
 import CanFrame from "./CanFrame";
 import CanFrameTransformer, { DLC_MASK, IS_EXTENDED_BIT, IS_RTR_BIT } from "./CanFrameTransformer";
-
 
 export enum CanMode {
     Normal = 0,
@@ -45,8 +46,6 @@ class CanAnalyzer {
         data.push(mode)
 
         data.push(0x55)
-
-        console.log(data.map(x => x.toString(16)).join(" "))
 
         await writer.write(new Uint8Array(data))
 
@@ -95,8 +94,6 @@ class CanAnalyzer {
 
         data.push(0x55)
 
-        console.log(data.map(x => x.toString(16)))
-
         await writer.write(new Uint8Array(data))
 
         writer.releaseLock()
@@ -105,6 +102,10 @@ class CanAnalyzer {
     async close() {
         this._canTransformer.controller?.terminate()
         await this._streamClosed.catch(() => { })
+    }
+
+    reset() {
+        this._canTransformer.goto("EXPECT_FRAME_HEADER")
     }
 }
 

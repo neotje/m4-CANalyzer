@@ -1,8 +1,17 @@
+"use strict";
+
 import AnalyzerContext, { defaultAnalyzerContext } from '@/lib/AnalyzerContext'
 import CanAnalyzer from '@/lib/CanAnalyzer'
+import CanFrame, { ICanFrame } from '@/lib/CanFrame'
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useState } from 'react'
+
+declare global {
+    interface Window {
+        dataSample: () => void
+    }
+}
 
 export default function App({ Component, pageProps }: AppProps) {
     const [serialPort, _setSerialPort] = useState<typeof defaultAnalyzerContext.serialPort>(defaultAnalyzerContext.serialPort)
@@ -16,14 +25,58 @@ export default function App({ Component, pageProps }: AppProps) {
     const [canBitrate, setCanBitrate] = useState<number>(defaultAnalyzerContext.canBitrate)
     const [canMode, setCanMode] = useState<number>(defaultAnalyzerContext.canMode)
 
+    const [sendFrameForm, setSendFrameForm] = useState<typeof defaultAnalyzerContext.sendFrameForm>(defaultAnalyzerContext.sendFrameForm)
+
+    const [canFrames, setCanFrames] = useState<typeof defaultAnalyzerContext.canFrames>(defaultAnalyzerContext.canFrames)
+
+    const [canRead, setCanRead] = useState<Promise<void> | null>(null)
+
+    if (typeof window !== "undefined") {
+        window.dataSample = () => {
+            let frames: ICanFrame[] = canFrames
+
+            for (let i = 0; i < 10; i++) {
+                frames = [...frames, CanFrame.random().toObject()]
+            }
+
+            setCanFrames(frames)
+        }
+    }
+
     const setSerialPort = (port: SerialPort | null) => {
         if (serialPort) {
             serialPort.close().then(() => {
                 _setSerialPort(port)
-            })
+            }).catch(() => {/* Ignore errors */ })
         } else {
             _setSerialPort(port)
         }
+    }
+
+    const readFrames = async (canAnalyzer: CanAnalyzer) => {
+        console.log('Start reader...')
+
+        const reader = canAnalyzer.readable.getReader()
+
+        let frames: ICanFrame[] = []
+
+        while (true) {
+            const { done, value } = await reader.read()
+
+            if (done) {
+                // Allow the serial port to be closed later.
+                reader.releaseLock()
+                break
+            }
+
+            if (value) {
+                frames = [...frames, value.toObject()]
+
+                setCanFrames(frames)
+            }
+        }
+
+        console.log('Stopping reader...')
     }
 
     const serialBegin = async () => {
@@ -39,7 +92,10 @@ export default function App({ Component, pageProps }: AppProps) {
             })
             setSerialPortConnected(true)
 
-            setCanAnalyzer(new CanAnalyzer(serialPort))
+            const canAnalyzer = new CanAnalyzer(serialPort)
+            setCanAnalyzer(canAnalyzer)
+
+            setCanRead(readFrames(canAnalyzer))
         } catch (error) {
             console.error(error)
             setSerialPortConnected(false)
@@ -55,9 +111,13 @@ export default function App({ Component, pageProps }: AppProps) {
 
         setSerialPortLocked(true)
 
-        try {           
+        try {
             if (canAnalyzer) {
                 await canAnalyzer.close()
+            }
+
+            if (canRead) {
+                await canRead
             }
 
             setCanAnalyzer(null)
@@ -97,6 +157,11 @@ export default function App({ Component, pageProps }: AppProps) {
         canMode,
         setCanMode,
         applyCanConfig,
+
+        sendFrameForm,
+        setSendFrameForm,
+
+        canFrames,
     }}>
         <Component {...pageProps} />
     </AnalyzerContext.Provider>
