@@ -15,7 +15,10 @@ interface IMessageTableContext {
 
 const MessageTableContext = createContext<IMessageTableContext>({
     idHexMode: false,
-    setIdHexMode: () => { }
+    setIdHexMode: () => { },
+
+    dataHexMode: false,
+    setDataHexMode: () => { }
 })
 
 const IdCell: React.FC<{ cell: MRT_Cell<ICanFrame> }> = ({ cell }) => {

@@ -41,7 +41,7 @@ const ResizableBox: React.FC<IResizableBoxProps> = ({ children, minWidth, maxWid
         setIsDragging(false);
     }
 
-    const handleMouseMove = useCallback(e => {
+    const handleMouseMove = useCallback<(this: Document, ev: DocumentEventMap["mousemove"]) => any>(e => {
         if (!verticalGrabberRef.current) return;
 
         let newWidth = e.clientX - verticalGrabberRef.current.offsetLeft;
@@ -50,7 +50,7 @@ const ResizableBox: React.FC<IResizableBoxProps> = ({ children, minWidth, maxWid
         if (maxWidth && newWidth > maxWidth) newWidth = maxWidth;
 
         setWidth(newWidth);
-    }, []);
+    }, [minWidth, maxWidth]);
 
     return (
         <Box
