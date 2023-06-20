@@ -1,10 +1,11 @@
 import { Box, Grid, IconButton, List, ListItem, Paper, Stack, Tooltip, styled } from '@mui/material';
 import { useState } from 'react';
-import { MdDeviceHub, MdSend, MdSettingsEthernet } from 'react-icons/md';
+import { MdDeviceHub, MdInfo, MdSend, MdSettingsEthernet } from 'react-icons/md';
 import ResizableBox from './ResizableBox';
 import DeviceSettings from './DeviceSettings';
 import CanSettings from './CanSettings';
 import SendFrameForm from './SendFrameForm';
+import Information from './Information';
 
 interface IDrawerPage {
     title: string,
@@ -62,6 +63,11 @@ export default function AppDrawer() {
             icon: <MdSend />,
             content: <SendFrameForm />
         },
+        "information": {
+            title: "Information",
+            icon: <MdInfo />,
+            content: <Information />
+        }
     }
 
     const [selected, setSelected] = useState<string | undefined>("device_settings")

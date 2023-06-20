@@ -12,7 +12,7 @@ export default function Home() {
     return (
         <>
             <Head>
-                <title>Feather M4 CAN analyzer</title>
+                <title>M4-CANalyzer</title>
                 <meta name="viewport" content="width=device-width, initial-scale=1" />
             </Head>
 
