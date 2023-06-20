@@ -6,6 +6,7 @@ import CanFrame, { ICanFrame } from '@/lib/CanFrame'
 import '@/styles/globals.css'
 import type { AppProps } from 'next/app'
 import { useState } from 'react'
+import { SnackbarProvider, enqueueSnackbar } from 'notistack'
 
 declare global {
     interface Window {
@@ -60,20 +61,25 @@ export default function App({ Component, pageProps }: AppProps) {
 
         let frames: ICanFrame[] = []
 
-        while (true) {
-            const { done, value } = await reader.read()
+        try {
+            while (true) {
+                const { done, value } = await reader.read()
 
-            if (done) {
-                // Allow the serial port to be closed later.
-                reader.releaseLock()
-                break
+                if (done) {
+                    // Allow the serial port to be closed later.
+                    reader.releaseLock()
+                    break
+                }
+
+                if (value) {
+                    frames = [...frames, value.toObject()]
+
+                    setCanFrames(frames)
+                }
             }
-
-            if (value) {
-                frames = [...frames, value.toObject()]
-
-                setCanFrames(frames)
-            }
+        } catch (error) {
+            
+            await serialClose()
         }
 
         console.log('Stopping reader...')
@@ -83,6 +89,13 @@ export default function App({ Component, pageProps }: AppProps) {
         if (!serialPort) {
             return
         }
+
+        serialPort.addEventListener('disconnect', async () => {
+            await serialClose()
+            enqueueSnackbar(`Lost connection`, {
+                variant: 'error',
+            })
+        })
 
         setSerialPortLocked(true)
 
@@ -98,6 +111,11 @@ export default function App({ Component, pageProps }: AppProps) {
             setCanRead(readFrames(canAnalyzer))
         } catch (error) {
             console.error(error)
+
+            enqueueSnackbar(`Could not connect to the serial port.`, {
+                variant: 'error',
+            })
+
             setSerialPortConnected(false)
             setCanAnalyzer(null)
         }
@@ -121,7 +139,7 @@ export default function App({ Component, pageProps }: AppProps) {
             }
 
             setCanAnalyzer(null)
-
+            
             await serialPort.close()
             setSerialPortConnected(false)
         } catch (error) {
@@ -139,30 +157,32 @@ export default function App({ Component, pageProps }: AppProps) {
         await canAnalyzer.sendConfig(canBitrate, canMode)
     }
 
-    return <AnalyzerContext.Provider value={{
-        serialPort,
-        setSerialPort,
-        baudrate,
-        setBaudrate,
+    return <SnackbarProvider>
+        <AnalyzerContext.Provider value={{
+            serialPort,
+            setSerialPort,
+            baudrate,
+            setBaudrate,
 
-        serialPortLocked,
-        serialPortConnected,
-        serialBegin,
-        serialClose,
+            serialPortLocked,
+            serialPortConnected,
+            serialBegin,
+            serialClose,
 
-        canAnalyzer,
+            canAnalyzer,
 
-        canBitrate,
-        setCanBitrate,
-        canMode,
-        setCanMode,
-        applyCanConfig,
+            canBitrate,
+            setCanBitrate,
+            canMode,
+            setCanMode,
+            applyCanConfig,
 
-        sendFrameForm,
-        setSendFrameForm,
+            sendFrameForm,
+            setSendFrameForm,
 
-        canFrames,
-    }}>
-        <Component {...pageProps} />
-    </AnalyzerContext.Provider>
+            canFrames,
+        }}>
+            <Component {...pageProps} />
+        </AnalyzerContext.Provider>
+    </SnackbarProvider>
 }
