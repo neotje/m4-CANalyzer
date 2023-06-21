@@ -7,17 +7,17 @@ Simple usb can analyzer based on Adafruit Feater M4 CAN board. Using a simple ua
 Global rules:
 
 ```abnf
-frame = frame_header frame_type frame_data frame_footer
+frame = frame-header frame-type frame-data frame-footer
 
-frame_header = %xAA
-frame_type = config_type / can_type / error_type
-config_type = %xBB
-can_type = %xCC
-error_type = %xEE
+frame-header = %xAA
+frame-type = config-type / can-type / error-type
+config-type = %xBB
+can-type = %xCC
+error-type = %xEE
 
-frame_data = config_data / can_data / error_data
+frame-data = config-data / can-data / error-data
 
-frame_footer = %x55
+frame-footer = %x55
 ```
 
 ### Config frame

@@ -3,5 +3,9 @@
         "activityBar.background": "#3D2A05",
         "titleBar.activeBackground": "#563B07",
         "titleBar.activeForeground": "#FEFAF3"
-    }
+    },
+    "files.associations": {
+        "bit": "cpp"
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }
