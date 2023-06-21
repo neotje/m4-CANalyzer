@@ -33,9 +33,9 @@ AA BB 00 0F 42 40 01 55
 
 
 ```abnf
-config_data = can_bit_rate
-can_bit_rate = 4OCTET ; 32bit unsigned long
-can_mode = 1OCTET ; 0 - normal, 1 - loopback, 2 - observe
+config-data = can-bit-rate
+can-bit-rate = 4OCTET ; 32bit unsigned long
+can-mode = 1OCTET ; 0 - normal, 1 - loopback, 2 - observe
 ```
 
 ### CAN message frame
@@ -52,25 +52,25 @@ AA CC 04 00 12 01 02 03 04 55
 ```
 
 ```abnf
-can_data = can_frame_type can_frame_id can_frame_data
+can-data = can-frame-type can-frame-id can-frame-data
 
-can_frame_type = 2BIT is_extended is_rtr dlc ; 1 Byte
-is_extended = BIT ; 1 if extended frame
-is_rtr = BIT ; 1 if remote frame
+can-frame-type = 2BIT is-extended is-rtr dlc ; 1 Byte
+is-extended = BIT ; 1 if extended frame
+is-rtr = BIT ; 1 if remote frame
 dlc = 4BIT ; 0-8
 
-can_frame_id = standard_id / extended_id
-standard_id = 2OCTET ; 11bit unsigned int
-extended_id = 4OCTET ; 29bit unsigned int
+can-frame-id = standard-id / extended-id
+standard-id = 2OCTET ; 11bit unsigned int
+extended-id = 4OCTET ; 29bit unsigned int
 
-can_frame_data = 0*8OCTET ; 0-8 bytes
+can-frame-data = 0*8OCTET ; 0-8 bytes
 ```
 
 ### Error frame
 
 ```abnf
-error_data = error_code
-error_code = 1OCTET
+error-data = error-code
+error-code = 1OCTET
 ; 0 - Starting can failed (probably invalid bit rate)
 ; 1 - Sending can frame failed (invalid id or data length)
 ```
