@@ -1,0 +1,5 @@
+#pragma once
+
+#define SERIAL_BAUD_RATE 2500000
+
+#define DEFAULT_CAN_BITRATE 250000

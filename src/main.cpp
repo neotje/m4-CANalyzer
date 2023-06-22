@@ -4,6 +4,7 @@
 #include "serial_parser.h"
 #include "can.h"
 #include "status_led.h"
+#include "config.h"
 
 void send_can_frame(Stream &out, can_frame_t &frame) {
     out.write(FRAME_HEADER);
@@ -109,11 +110,11 @@ void setup() {
     set_status_led(STATUS_READY);
     set_status_led_temporary(STATUS_LOADING, 100);
 
-    Serial.begin(115200);
+    Serial.begin(SERIAL_BAUD_RATE);
 
     setupCAN();
 
-    if (!CAN.begin(250000)) {
+    if (!CAN.begin(DEFAULT_CAN_BITRATE)) {
         send_error_frame(Serial, STARTING_CAN_ERROR);
     }
 
