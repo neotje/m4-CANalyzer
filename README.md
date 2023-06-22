@@ -2,6 +2,40 @@
 
 Simple usb can analyzer based on Adafruit Feater M4 CAN board. Using a simple uart based protocol.
 
+## Installation
+
+### Adafruit feather M4 CAN
+
+Clone this repo `git clone https://github.com/neotje/m4-CANalyzer.git`
+
+Install [Platformio IDE](https://marketplace.visualstudio.com/items?itemName=platformio.platformio-ide) in vscode.
+
+Open the cloned repo in vscode.
+
+Connect the feather M4 CAN board to your computer.
+
+Press the upload button in vscode.
+
+### Web interface
+
+Available at [m4-canalyzer.neo-web.nl](https://m4-canalyzer.neo-web.nl)
+
+or
+
+```
+cd {this repo root}/web/web-can-analyzer
+
+npm install
+
+# build/run for production
+npm run build
+npm run start
+
+# or run in dev mode
+npm run dev
+```
+
+
 ## Uart protocol
 
 Global rules:
